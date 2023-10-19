@@ -1,72 +1,69 @@
-// arr = [3,7,8,5,2,1,9,5,4]
+const unitTest = require('./unitTest.js');
+const randomArrays = require('./generateRandomArrays.js')
+
+// arr = [ 75, 21, 22, 98 ]
 // const arr = randomArray()
-const arr = [
-    76, 99,  4, 27, 88, 24,
-    32, 74, 42, 54, 41, 39,
-    21
-  ]
-// console.log(arr)
-// process.exit()
-let co = 0
 
-console.log('START: ')
-console.log(arr);
-// process.exit()
-console.log('\n')
-
-partialSort(arr, 0, arr.length - 1, 'start');
-
-console.log('\n')
-console.log('KONIEC: ')
-console.log(arr);
-
-function quickSort(oldArray){
-    const newArray = [...oldArray];
+function testSortingAlghoritm(arrayToSort){
+    const result = JSON.stringify(quickSort(arrayToSort));
+    // console.log(`My result: ${result}`);
+    unitTest.assert(result === JSON.stringify([...arrayToSort].sort((a,b) => a-b)));
 }
 
 
-function partialSort(workingArray, startIndex, stopIndex, comment){
-    // console.log(comment, startIndex, stopIndex)
-    // co++
-    // if (co == 18) process.exit()
-    if (stopIndex == 0 || startIndex + 1 >= stopIndex || stopIndex < startIndex) return;
 
-    let left = startIndex;
-    let right = stopIndex - 1;
-    const pivot = workingArray[stopIndex];
-    console.log(workingArray, 'pivot:', pivot, '\n')
+const testCases = randomArrays.getArraysToSort()
+testCases.forEach(test => {
+    unitTest.test(`${test} => ${[...test].sort((a,b) => a-b)}`, () => {testSortingAlghoritm(test)});
+})
 
-    // console.log('pivot: ', pivot)
 
-    while (left < right){
-        while (workingArray[left] < pivot && left < right){
-            left++;
-        }
-        if (left > right) break;
+function quickSort(oldArray){
+    const newArray = [...oldArray];
+    partialSort(newArray, 0, newArray.length - 1, 'start');
 
-        if (workingArray[left] > pivot){
-            const oldLeft = workingArray[left];
-            workingArray[left] = workingArray[right];
-            workingArray[right] = pivot;
-            workingArray[right + 1] = oldLeft;
-            right--;
-        }
-     
+    return newArray;
+}
+
+
+function partialSort(workingArray, startIndex, stopIndex){
+  if (startIndex >= stopIndex) return;
+  let left = startIndex;
+  let pivotIndex = stopIndex;
+  const pivot = workingArray[stopIndex];
+
+  while (left < pivotIndex){
+    if (workingArray[left] > pivot && pivotIndex > left + 1){
+        changeItems(workingArray, pivotIndex, pivotIndex - 1);
+        pivotIndex--;
+        changeItems(workingArray, left, pivotIndex + 1);
 
     }
-    // console.log(workingArray, right + 1, stopIndex);
-    // console.log('\n')
-    partialSort(workingArray, startIndex, right, 'left');
-    partialSort(workingArray, right + 1, stopIndex, 'right');
+    else if (workingArray[left] > pivot && pivotIndex === left + 1){
+        changeItems(workingArray, pivotIndex, left);
+        pivotIndex--;
+    }
+
+    if (workingArray[left] <= pivot) left++;
+  }
+
+  partialSort(workingArray, startIndex, pivotIndex - 1);
+  partialSort(workingArray, pivotIndex + 1, stopIndex);  
+
 }
 
 function randomArray(maximum = 15, min = 4){
     let size = Math.floor(Math.random() * maximum)
     if (size < min) size = min;
     ar = [];
-    console.log(size)
     for (let i = 0; i < size; i++){
         ar.push(Math.round(Math.random() * 100));
     }
     return ar;
+}
+
+function changeItems(currentArray, index1, index2){
+    const temporary = currentArray[index1];
+    currentArray[index1] = currentArray[index2];
+    currentArray[index2] = temporary;
 }
